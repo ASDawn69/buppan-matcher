@@ -1,5 +1,4 @@
 flask
 pandas
-scikit-learn
 torch
 sentence-transformers
