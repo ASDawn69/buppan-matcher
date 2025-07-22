@@ -1,14 +1,18 @@
 from flask import Flask, request, jsonify
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+from sentence_transformers import SentenceTransformer, util
 import pandas as pd
+import torch
 
 # CSV読み込み
 df = pd.read_csv("directory_list_utf8.csv", encoding="utf-8")
+categories = df["ディレクトリID"].tolist()
+labels = df["カテゴリ名"].tolist()
 
-# TF-IDF初期化（n-gramで柔軟性を高める）
-vectorizer = TfidfVectorizer(ngram_range=(1, 2))
-tfidf_matrix = vectorizer.fit_transform(df["カテゴリ名"])
+# sBERTモデルのロード（多言語対応モデル）
+model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
+
+# カテゴリ名をベクトル化して保持
+category_embeddings = model.encode(labels, convert_to_tensor=True)
 
 # Flaskアプリ初期化
 app = Flask(__name__)
@@ -17,16 +21,26 @@ app = Flask(__name__)
 def match():
     data = request.get_json()
     keyword = data.get("keyword", "")
-    input_vec = vectorizer.transform([keyword])
-    similarities = cosine_similarity(input_vec, tfidf_matrix)
+    
+    # 入力が空ならエラー
+    if not keyword.strip():
+        return jsonify({"directory_id": "見つかりません"})
+    
+    # 入力キーワードをベクトル化
+    input_embedding = model.encode(keyword, convert_to_tensor=True)
 
-    best_index = similarities.argmax()
-    best_score = similarities[0, best_index]
+    # 類似度計算
+    cosine_scores = util.cos_sim(input_embedding, category_embeddings)[0]
 
-    if best_score < 0.05:
+    # 最もスコアの高いインデックスを取得
+    best_index = torch.argmax(cosine_scores).item()
+    best_score = cosine_scores[best_index].item()
+
+    # 閾値を設定（0.35くらいがおすすめ）
+    if best_score < 0.35:
         return jsonify({"directory_id": "見つかりません"})
 
-    matched_id = df.iloc[best_index]["ディレクトリID"]
+    matched_id = categories[best_index]
     return jsonify({"directory_id": matched_id})
 
 if __name__ == "__main__":
