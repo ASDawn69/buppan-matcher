@@ -4,7 +4,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
 
 # CSV読み込み（ヘッダー行を正しく認識）
-df = pd.read_csv("directory_list_utf8.csv", encoding="utf-8", header=0)
+df = pd.read_csv("directory_list_true.csv", encoding="utf-8", header=0)
 
 # 前処理関数
 def preprocess_text(text):
