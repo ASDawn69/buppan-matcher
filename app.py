@@ -8,8 +8,7 @@ df = pd.read_csv("directory_list_utf8.csv", encoding="utf-8")
 categories = df["ディレクトリID"].tolist()
 labels = df["カテゴリ名"].tolist()
 
-# sBERTモデルのロード（多言語対応モデル）
-model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
+model = SentenceTransformer("sonoisa/sentence-bert-base-ja-mean-tokens")
 
 # カテゴリ名をベクトル化して保持
 category_embeddings = model.encode(labels, convert_to_tensor=True)
