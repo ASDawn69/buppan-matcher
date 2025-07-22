@@ -23,7 +23,7 @@ def match():
     best_index = similarities.argmax()
     best_score = similarities[0, best_index]
 
-    if best_score < 0.2:
+    if best_score < 0.05:
         return jsonify({"directory_id": "見つかりません"})
 
     matched_id = df.iloc[best_index]["ディレクトリID"]
