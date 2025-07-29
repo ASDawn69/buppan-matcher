@@ -1,8 +1,5 @@
 Flask
 gunicorn
 pandas
-numpy
 scikit-learn
-gensim
-mecab-python3
-unidic-lite
+rapidfuzz
