@@ -1,7 +1,5 @@
 Flask
-gensim
-mecab-python3
-unidic-lite
-scikit-learn
 pandas
+scikit-learn
+rapidfuzz
 numpy
